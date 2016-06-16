@@ -1,0 +1,1 @@
+{"virtualbox":{"/srv/phabricator":{"guestpath":"/srv/phabricator","hostpath":"/Users/anton/web/phabricator/vagrant","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/Users/anton/web/phabricator","disabled":false,"__vagrantfile":true}}}

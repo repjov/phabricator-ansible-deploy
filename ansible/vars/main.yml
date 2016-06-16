@@ -1,0 +1,50 @@
+#Project section
+project_folder: /srv/phabricator
+base_uri: http://phabricator.dev/
+
+#Nginx section
+nginx_sites:
+  default:
+     - listen   80
+     - server_name phabricator.dev
+     - root "{% if ansible_os_family == 'FreeBSD' %}/usr/local/www/nginx-dist{% else %}{{project_folder}}/phabricator/webroot{% endif %}"
+     - location / { index index.php; rewrite ^/(.*)$ /index.php?__path__=/$1 last;}
+     - location = /favicon.ico {try_files $uri =204;}
+     - location /index.php { fastcgi_pass   localhost:9000; fastcgi_index   index.php; fastcgi_param  REDIRECT_STATUS    200; fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name; fastcgi_param  QUERY_STRING       $query_string; fastcgi_param  REQUEST_METHOD     $request_method; fastcgi_param  CONTENT_TYPE       $content_type; fastcgi_param  CONTENT_LENGTH     $content_length; fastcgi_param  SCRIPT_NAME        $fastcgi_script_name; fastcgi_param  GATEWAY_INTERFACE  CGI/1.1; fastcgi_param  SERVER_SOFTWARE    nginx/$nginx_version; fastcgi_param  REMOTE_ADDR        $remote_addr;}
+     - location ~ \.php$ {try_files $uri =404; fastcgi_pass unix:/var/run/php5-fpm.sock; fastcgi_index index.php; fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; include fastcgi_params;}
+
+#MYSQL section
+mysql_root_password_update: no
+mysql_root_host: localhost
+mysql_root_username: root
+mysql_root_password: hello123
+
+#PHP section
+php_packages:
+  - php5
+  - php5-cli
+  - php5-common
+  - php5-mysql
+  - php-apc
+  - php5-curl
+  - php5-dev
+  - php5-fpm
+  - php5-mcrypt
+  - php5-gd
+  - php-pear
+  - libpcre3-dev
+  - php5-xmlrpc
+  - php-soap
+
+php_conf_paths:
+  - /etc/php5/fpm
+  - /etc/php5/apache2
+  - /etc/php5/cli
+php_extension_conf_paths:
+  - /etc/php5/fpm/conf.d
+  - /etc/php5/apache2/conf.d
+  - /etc/php5/cli/conf.d
+php_fpm_daemon: php5-fpm
+php_fpm_conf_path: "/etc/php5/fpm"
+php_fpm_pool_conf_path: "{{ php_fpm_conf_path }}/pool.d/www.conf"
+

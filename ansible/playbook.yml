@@ -1,0 +1,49 @@
+---
+
+- hosts: server
+  sudo: yes
+  vars_files:
+    - vars/main.yml
+  roles:
+    - ansible-role-git
+    - ansible-role-mysql
+    - ansible-role-php
+    - ansible-role-nginx
+
+  tasks:
+    # - name: General | Install required packages.
+    #   action: apt pkg={{ item }} state=installed
+    #   with_items:
+    #     - python-pip
+
+    # - name: 'Install pexpect'
+    #   command: pip install pexpect
+    #   sudo: yes
+
+    - name: 'Clone libphutil'
+      git:  repo=https://github.com/phacility/libphutil.git
+            dest={{project_folder}}/libphutil
+    - name: 'Clone arcanist'
+      git:  repo=https://github.com/phacility/arcanist.git
+            dest={{project_folder}}/arcanist
+    - name: 'Clone phabricator'
+      git:  repo=https://github.com/phacility/phabricator.git
+            dest={{project_folder}}/phabricator
+
+  #SETUP Phabricator
+    - name: 'set base-uri'
+      command: "{{ project_folder }}/phabricator/bin/config set phabricator.base-uri '{{base_uri}}'"
+    - name: 'set MySQL configuration host'
+      command: "{{ project_folder }}/phabricator/bin/config set mysql.host {{mysql_root_host}}"
+    - name: 'set MySQL configuration name'
+      command: "{{project_folder}}/phabricator/bin/config set mysql.user {{mysql_root_username}}"
+    - name: 'set MySQL configuration password'
+      command: "{{project_folder}}/phabricator/bin/config set mysql.pass {{mysql_root_password}}"
+    # - name: 'Stop Phabricator Daemons'
+    #   command: "{{project_folder}}/phabricator/bin/phd stop --force"
+    #   sudo: yes
+    - name: 'Setup MySQL Schema'
+      command: "{{project_folder}}/phabricator/bin/storage upgrade --force"
+    - name: 'Run Phabricator Daemons'
+      command: "{{project_folder}}/phabricator/bin/phd start"
+  
